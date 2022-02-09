@@ -1,1 +1,3 @@
-# tictactoe
+# TicTacToe
+
+![demo](demo.png)
