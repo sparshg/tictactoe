@@ -1,6 +1,8 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(
@@ -73,23 +75,20 @@ class _BoardState extends State<Board> {
   ];
   var board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
   var turn = 1;
+  var winner = '';
+  var activated = true;
   late List<Tile> tiles;
 
   void reset(String text) {
-    showDialog(
-        context: context,
-        builder: (_) {
-          return AlertDialog(
-            title: Text(text),
-          );
-        });
+    activated = false;
+    setState(() => winner = text);
     Future.delayed(const Duration(seconds: 1), () {
       RestartWidget.restartApp(context);
     });
   }
 
   int updateBoard(int tag) {
-    if (board[tag] == 0) {
+    if (board[tag] == 0 && activated) {
       board[tag] += turn;
       log(board.toString());
       turn *= -1;
@@ -98,10 +97,10 @@ class _BoardState extends State<Board> {
         if (board[i[0]] + board[i[1]] + board[i[2]] == 3) {
           log(i.toString());
           reset("O Won");
-          return 0;
+          // return 0;
         } else if (board[i[0]] + board[i[1]] + board[i[2]] == -3) {
           reset("X Won");
-          return 0;
+          // return 0;
         }
       }
       if (!board.contains(0)) {
@@ -118,30 +117,63 @@ class _BoardState extends State<Board> {
     tiles = List.generate(9, (i) => Tile(tag: i, w: w, update: updateBoard));
 
     return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: EdgeInsets.all(_padding),
-          child: Stack(alignment: AlignmentDirectional.center, children: [
-            Image.asset('images/board.png'),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Row(
-                  children: [tiles[0], tiles[1], tiles[2]],
-                ),
-                Row(
-                  children: [tiles[3], tiles[4], tiles[5]],
-                ),
-                Row(
-                  children: [tiles[6], tiles[7], tiles[8]],
-                ),
-              ],
-            ),
-          ]),
-        ),
+      backgroundColor: const Color(0xff57baac),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text("TIC TAC TOE",
+              style: TextStyle(
+                  fontSize: 48,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF545454))),
+          const SizedBox.square(dimension: 60),
+          Padding(
+            padding: EdgeInsets.all(_padding),
+            child: Stack(alignment: AlignmentDirectional.center, children: [
+              Lottie.asset(
+                'images/board.json',
+                repeat: false,
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Row(
+                    children: [tiles[0], tiles[1], tiles[2]],
+                  ),
+                  Row(
+                    children: [tiles[3], tiles[4], tiles[5]],
+                  ),
+                  Row(
+                    children: [tiles[6], tiles[7], tiles[8]],
+                  ),
+                ],
+              ),
+            ]),
+          ),
+          const SizedBox.square(dimension: 30),
+          Text(winner,
+              style: const TextStyle(
+                  fontSize: 42,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF545454))),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _launchURL,
+        backgroundColor: const Color(0xff57baac),
+        child: Image.asset('images/github.png'),
       ),
     );
+  }
+
+  _launchURL() async {
+    const url = 'https://github.com/sparshg/tictactoe';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 }
 
@@ -158,8 +190,22 @@ class Tile extends StatefulWidget {
   State<Tile> createState() => _TileState();
 }
 
-class _TileState extends State<Tile> {
+class _TileState extends State<Tile> with TickerProviderStateMixin {
+  late AnimationController _controller;
   Widget _icon = Container();
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+        duration: const Duration(milliseconds: 200), vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -170,9 +216,19 @@ class _TileState extends State<Tile> {
         onPressed: () {
           setState(() {
             final out = widget.update(widget.tag);
-            _icon = out == 1
-                ? Image.asset('images/cross.png')
-                : Image.asset('images/circle.png');
+            if (out == 1) {
+              _icon = Lottie.asset('images/cross.json',
+                  repeat: false,
+                  controller: _controller, onLoaded: (composition) {
+                _controller.forward();
+              });
+            } else if (out == -1) {
+              _icon = Lottie.asset('images/circle.json',
+                  repeat: false,
+                  controller: _controller, onLoaded: (composition) {
+                _controller.forward();
+              });
+            }
           });
         },
         icon: _icon,
