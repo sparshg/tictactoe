@@ -97,10 +97,10 @@ class _BoardState extends State<Board> {
         if (board[i[0]] + board[i[1]] + board[i[2]] == 3) {
           log(i.toString());
           reset("O Won");
-          // return 0;
+          return turn;
         } else if (board[i[0]] + board[i[1]] + board[i[2]] == -3) {
           reset("X Won");
-          // return 0;
+          return turn;
         }
       }
       if (!board.contains(0)) {
