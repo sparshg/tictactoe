@@ -1,7 +1,5 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
+import 'package:rive/rive.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 void main() {
@@ -90,12 +88,10 @@ class _BoardState extends State<Board> {
   int updateBoard(int tag) {
     if (board[tag] == 0 && activated) {
       board[tag] += turn;
-      log(board.toString());
       turn *= -1;
 
       for (var i in wins) {
         if (board[i[0]] + board[i[1]] + board[i[2]] == 3) {
-          log(i.toString());
           reset("O Won");
           return turn;
         } else if (board[i[0]] + board[i[1]] + board[i[2]] == -3) {
@@ -113,8 +109,11 @@ class _BoardState extends State<Board> {
 
   @override
   Widget build(BuildContext context) {
-    final w = (MediaQuery.of(context).size.width - 2 * _padding) / 3;
-    tiles = List.generate(9, (i) => Tile(tag: i, w: w, update: updateBoard));
+    final width = MediaQuery.of(context).size.width;
+    tiles = List.generate(
+        9,
+        (i) =>
+            Tile(tag: i, w: (width - 2 * _padding) / 3, update: updateBoard));
 
     return Scaffold(
       backgroundColor: const Color(0xff57baac),
@@ -130,9 +129,12 @@ class _BoardState extends State<Board> {
           Padding(
             padding: EdgeInsets.all(_padding),
             child: Stack(alignment: AlignmentDirectional.center, children: [
-              Lottie.asset(
-                'images/board.json',
-                repeat: false,
+              LimitedBox(
+                maxHeight: width - 2 * _padding,
+                child: const RiveAnimation.asset(
+                  'images/art.riv',
+                  artboard: 'Board',
+                ),
               ),
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -185,22 +187,8 @@ class Tile extends StatefulWidget {
   State<Tile> createState() => _TileState();
 }
 
-class _TileState extends State<Tile> with TickerProviderStateMixin {
-  late AnimationController _controller;
+class _TileState extends State<Tile> {
   Widget _icon = Container();
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-        duration: const Duration(milliseconds: 200), vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -212,17 +200,15 @@ class _TileState extends State<Tile> with TickerProviderStateMixin {
           setState(() {
             final out = widget.update(widget.tag);
             if (out == 1) {
-              _icon = Lottie.asset('images/cross.json',
-                  repeat: false,
-                  controller: _controller, onLoaded: (composition) {
-                _controller.forward();
-              });
+              _icon = const RiveAnimation.asset(
+                'images/art.riv',
+                artboard: 'Cross',
+              );
             } else if (out == -1) {
-              _icon = Lottie.asset('images/circle.json',
-                  repeat: false,
-                  controller: _controller, onLoaded: (composition) {
-                _controller.forward();
-              });
+              _icon = const RiveAnimation.asset(
+                'images/art.riv',
+                artboard: 'Circle',
+              );
             }
           });
         },
