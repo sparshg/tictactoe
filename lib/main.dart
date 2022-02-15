@@ -137,17 +137,12 @@ class _BoardState extends State<Board> {
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Row(
-                    children: [tiles[0], tiles[1], tiles[2]],
+                children: List.generate(
+                  3,
+                  (i) => Row(
+                    children: List.generate(3, (j) => tiles[j + 3 * i]),
                   ),
-                  Row(
-                    children: [tiles[3], tiles[4], tiles[5]],
-                  ),
-                  Row(
-                    children: [tiles[6], tiles[7], tiles[8]],
-                  ),
-                ],
+                ),
               ),
             ]),
           ),
@@ -178,13 +173,13 @@ class _BoardState extends State<Board> {
 }
 
 class Tile extends StatefulWidget {
-  final double w;
-  final int tag;
-  final int Function(int) update;
-
   const Tile(
       {Key? key, required this.w, required this.tag, required this.update})
       : super(key: key);
+
+  final double w;
+  final int tag;
+  final int Function(int) update;
 
   @override
   State<Tile> createState() => _TileState();
