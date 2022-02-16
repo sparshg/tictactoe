@@ -96,12 +96,13 @@ class _BoardState extends State<Board> {
   var winner = '';
   var activated = true;
   late List<Tile> tiles;
+  SMITrigger? _redraw;
 
   void reset(String text) {
     activated = false;
     setState(() => winner = text);
     Future.delayed(const Duration(seconds: 1), () {
-      // RestartWidget.restartApp(context);
+      setState(() => _redraw?.fire());
     });
   }
 
@@ -137,9 +138,15 @@ class _BoardState extends State<Board> {
 
     final frame = LimitedBox(
       maxHeight: width,
-      child: const RiveAnimation.asset(
+      child: RiveAnimation.asset(
         'images/art.riv',
         artboard: 'Board',
+        onInit: (Artboard artboard) {
+          final controller =
+              StateMachineController.fromArtboard(artboard, 'StateMachine');
+          artboard.addController(controller!);
+          _redraw = controller.findInput<bool>('Reset') as SMITrigger;
+        },
       ),
     );
 
