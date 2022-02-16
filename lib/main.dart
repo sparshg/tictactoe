@@ -96,18 +96,16 @@ class _BoardState extends State<Board> {
   var turn = 1;
   var winner = '';
   var activated = true;
+  var restart = false;
   late List<Tile> tiles;
   SMITrigger? _redraw;
 
   void reset(String text) {
     activated = false;
-    setState(() => winner = text);
+    // setState(() => winner = text);
     Future.delayed(const Duration(seconds: 1), () {
-      turn = 1;
       setState(() {
-        board = List.filled(9, 0);
-        _redraw?.fire();
-        activated = true;
+        restart = true;
       });
     });
   }
@@ -121,10 +119,12 @@ class _BoardState extends State<Board> {
       for (var i in wins) {
         if (board[i[0]] + board[i[1]] + board[i[2]] == 3) {
           reset("O Won");
-          // return turn;
+          dev.log("O WON");
+          return;
         } else if (board[i[0]] + board[i[1]] + board[i[2]] == -3) {
+          dev.log("X WON");
           reset("X Won");
-          // return turn;
+          return;
         }
       }
       if (!board.contains(0)) {
@@ -142,8 +142,22 @@ class _BoardState extends State<Board> {
         min(MediaQuery.of(context).size.width - 2 * _padding, 590);
     tiles = List.generate(
         9,
-        (i) =>
-            Tile(tag: i, w: width / 3, state: board[i], update: updateBoard));
+        (i) => Tile(
+              tag: i,
+              w: width / 3,
+              state: board[i],
+              update: updateBoard,
+              reset: restart,
+            ));
+
+    if (restart) {
+      restart = false;
+      board = List.filled(9, 0);
+      turn = 1;
+      _redraw?.fire();
+      activated = true;
+    }
+
     final frame = LimitedBox(
       maxHeight: width,
       child: RiveAnimation.asset(

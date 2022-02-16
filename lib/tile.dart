@@ -1,19 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
 
-class Tile extends StatelessWidget {
-  Tile(
-      {Key? key,
-      required this.tag,
-      required this.w,
-      required this.state,
-      required this.update})
-      : super(key: key);
+class Tile extends StatefulWidget {
+  const Tile({
+    Key? key,
+    required this.tag,
+    required this.w,
+    required this.state,
+    required this.update,
+    required this.reset,
+  }) : super(key: key);
 
   final double w;
   final int tag;
   final int state;
   final ValueChanged<int> update;
+  final bool reset;
+
+  @override
+  State<Tile> createState() => _TileState();
+}
+
+class _TileState extends State<Tile> {
   SMIBool? _draw;
 
   void _riveInit(Artboard artboard) {
@@ -26,24 +34,33 @@ class Tile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: w,
-      height: w,
+      width: widget.w,
+      height: widget.w,
       child: IconButton(
-        onPressed: () => update(tag),
+        onPressed: () {
+          widget.update(widget.tag);
+          _draw?.change(true);
+        },
         icon: getIcon(),
       ),
     );
   }
 
   Widget getIcon() {
-    switch (state) {
+    switch (widget.state) {
       case 1:
+        if (widget.reset) {
+          _draw?.change(false);
+        }
         return RiveAnimation.asset(
           'images/art.riv',
           artboard: 'Circle',
           onInit: _riveInit,
         );
       case -1:
+        if (widget.reset) {
+          _draw?.change(false);
+        }
         return RiveAnimation.asset(
           'images/art.riv',
           artboard: 'Cross',
