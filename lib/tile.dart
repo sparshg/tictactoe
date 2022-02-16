@@ -39,7 +39,6 @@ class _TileState extends State<Tile> {
       child: IconButton(
         onPressed: () {
           widget.update(widget.tag);
-          _draw?.change(true);
         },
         icon: getIcon(),
       ),
@@ -47,27 +46,31 @@ class _TileState extends State<Tile> {
   }
 
   Widget getIcon() {
+    final String _image;
+    if (_draw?.value == false) {
+      _draw?.change(true);
+      return Container();
+    }
     switch (widget.state) {
       case 1:
-        if (widget.reset) {
-          _draw?.change(false);
-        }
-        return RiveAnimation.asset(
-          'images/art.riv',
-          artboard: 'Circle',
-          onInit: _riveInit,
-        );
+        _image = 'Circle';
+        break;
       case -1:
-        if (widget.reset) {
-          _draw?.change(false);
-        }
-        return RiveAnimation.asset(
-          'images/art.riv',
-          artboard: 'Cross',
-          onInit: _riveInit,
-        );
+        _image = 'Cross';
+        break;
       default:
         return Container();
     }
+    if (widget.reset) {
+      _draw?.change(false);
+      Future.delayed(const Duration(milliseconds: 200), () {
+        setState(() {});
+      });
+    }
+    return RiveAnimation.asset(
+      'images/art.riv',
+      artboard: _image,
+      onInit: _riveInit,
+    );
   }
 }
