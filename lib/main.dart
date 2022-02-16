@@ -50,7 +50,6 @@ class Main extends StatelessWidget {
           SizedBox.square(dimension: 60),
           Board(),
           SizedBox.square(dimension: 30),
-          winner
         ],
       ),
       floatingActionButton: FloatingActionButton(
