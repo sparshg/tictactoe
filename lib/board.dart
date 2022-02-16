@@ -4,7 +4,8 @@ import 'dart:math';
 import 'package:rive/rive.dart';
 
 class Board extends StatefulWidget {
-  const Board({Key? key}) : super(key: key);
+  const Board({Key? key, this.changeScore}) : super(key: key);
+  final ValueChanged<int>? changeScore;
 
   @override
   State<Board> createState() => _BoardState();
@@ -54,10 +55,15 @@ class _BoardState extends State<Board> {
   void spawnMark(String text, {bool tie = false}) {
     activated = false;
     // setState(() => winner = text);
-    if (!tie) {
-      Future.delayed(
-          const Duration(milliseconds: 500), () => setState(() => mark = true));
-    }
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (!tie) {
+        widget.changeScore!(turn);
+        setState(() => mark = true);
+      } else {
+        reset();
+      }
+    });
   }
 
   void updateBoard(int tag) {
