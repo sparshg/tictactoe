@@ -1,22 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
 
-class Tile extends StatefulWidget {
-  const Tile(
-      {Key? key, required this.w, required this.tag, required this.update})
+class Tile extends StatelessWidget {
+  Tile(
+      {Key? key,
+      required this.tag,
+      required this.w,
+      required this.state,
+      required this.update})
       : super(key: key);
 
   final double w;
   final int tag;
-  final int Function(int) update;
-
-  @override
-  State<Tile> createState() => _TileState();
-}
-
-class _TileState extends State<Tile> {
+  final int state;
+  final ValueChanged<int> update;
   SMIBool? _draw;
-  Widget _icon = Container();
 
   void _riveInit(Artboard artboard) {
     final controller =
@@ -28,29 +26,31 @@ class _TileState extends State<Tile> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: widget.w,
-      height: widget.w,
+      width: w,
+      height: w,
       child: IconButton(
-        onPressed: () {
-          setState(() {
-            final out = widget.update(widget.tag);
-            if (out == 1) {
-              _icon = RiveAnimation.asset(
-                'images/art.riv',
-                artboard: 'Cross',
-                onInit: _riveInit,
-              );
-            } else if (out == -1) {
-              _icon = RiveAnimation.asset(
-                'images/art.riv',
-                artboard: 'Circle',
-                onInit: _riveInit,
-              );
-            }
-          });
-        },
-        icon: _icon,
+        onPressed: () => update(tag),
+        icon: getIcon(),
       ),
     );
+  }
+
+  Widget getIcon() {
+    switch (state) {
+      case 1:
+        return RiveAnimation.asset(
+          'images/art.riv',
+          artboard: 'Circle',
+          onInit: _riveInit,
+        );
+      case -1:
+        return RiveAnimation.asset(
+          'images/art.riv',
+          artboard: 'Cross',
+          onInit: _riveInit,
+        );
+      default:
+        return Container();
+    }
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:developer' as dev;
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
@@ -102,30 +103,36 @@ class _BoardState extends State<Board> {
     activated = false;
     setState(() => winner = text);
     Future.delayed(const Duration(seconds: 1), () {
-      setState(() => _redraw?.fire());
+      turn = 1;
+      setState(() {
+        board = List.filled(9, 0);
+        _redraw?.fire();
+        activated = true;
+      });
     });
   }
 
-  int updateBoard(int tag) {
+  void updateBoard(int tag) {
     if (board[tag] == 0 && activated) {
-      board[tag] += turn;
-      turn *= -1;
-
+      setState(() {
+        board[tag] += turn;
+        turn *= -1;
+      });
       for (var i in wins) {
         if (board[i[0]] + board[i[1]] + board[i[2]] == 3) {
           reset("O Won");
-          return turn;
+          // return turn;
         } else if (board[i[0]] + board[i[1]] + board[i[2]] == -3) {
           reset("X Won");
-          return turn;
+          // return turn;
         }
       }
       if (!board.contains(0)) {
         reset("Tie");
       }
-      return turn;
+      // return turn;
     }
-    return 0;
+    // return 0;
   }
 
   @override
@@ -134,8 +141,9 @@ class _BoardState extends State<Board> {
     final double width =
         min(MediaQuery.of(context).size.width - 2 * _padding, 590);
     tiles = List.generate(
-        9, (i) => Tile(tag: i, w: width / 3, update: updateBoard));
-
+        9,
+        (i) =>
+            Tile(tag: i, w: width / 3, state: board[i], update: updateBoard));
     final frame = LimitedBox(
       maxHeight: width,
       child: RiveAnimation.asset(
