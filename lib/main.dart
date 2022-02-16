@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -109,11 +111,10 @@ class _BoardState extends State<Board> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final double width =
+        min(MediaQuery.of(context).size.width - 2 * _padding, 590);
     tiles = List.generate(
-        9,
-        (i) =>
-            Tile(tag: i, w: (width - 2 * _padding) / 3, update: updateBoard));
+        9, (i) => Tile(tag: i, w: width / 3, update: updateBoard));
 
     return Scaffold(
       backgroundColor: const Color(0xff57baac),
@@ -130,7 +131,7 @@ class _BoardState extends State<Board> {
             padding: EdgeInsets.all(_padding),
             child: Stack(alignment: AlignmentDirectional.center, children: [
               LimitedBox(
-                maxHeight: width - 2 * _padding,
+                maxHeight: width,
                 child: const RiveAnimation.asset(
                   'images/art.riv',
                   artboard: 'Board',
@@ -138,10 +139,10 @@ class _BoardState extends State<Board> {
               ),
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: List.generate(
                   3,
                   (i) => Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(3, (j) => tiles[j + 3 * i]),
                   ),
                 ),
