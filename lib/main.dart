@@ -145,15 +145,15 @@ class _MainState extends State<Main> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          const Spacer(),
+          const Spacer(flex: 2),
           title,
           difficultyRow,
-          const Spacer(),
+          const Spacer(flex: 2),
           Board(
             changeScore: (i) => setState(() => i == 1 ? scoreX++ : scoreO++),
             difficulty: _on,
           ),
-          const Spacer(),
+          const Spacer(flex: 2),
           Row(children: [
             Expanded(child: Score(score: scoreO, type: 0, reset: resetScores)),
             Expanded(child: Score(score: scoreX, type: 1, reset: resetScores)),
@@ -185,7 +185,8 @@ class _MainState extends State<Main> {
                 ),
               ),
             ),
-          ])
+          ]),
+          const Spacer(),
         ],
       ),
     );
