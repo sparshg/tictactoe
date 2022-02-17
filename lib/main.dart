@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'board.dart';
 import 'package:rive/rive.dart';
+import 'package:flutter/services.dart';
 
 const Color green = Color(0xFF57BAAC);
 const Color lighterGreen = Color.fromARGB(255, 78, 170, 156);
@@ -20,6 +21,11 @@ class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     return MaterialApp(
       title: 'TicTacToe',
       theme: ThemeData(primarySwatch: Colors.teal),

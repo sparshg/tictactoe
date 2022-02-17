@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'tile.dart';
 import 'dart:math';
 import 'package:rive/rive.dart';
-import 'package:flutter/services.dart';
 
 class Board extends StatefulWidget {
   const Board({Key? key, this.changeScore, required this.difficulty})
@@ -49,31 +48,43 @@ class _BoardState extends State<Board> {
   @override
   void initState() {
     super.initState();
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
     _controllerB = OneShotAnimation('Black', onStop: reset);
     _controllerW = OneShotAnimation('White', onStop: reset);
   }
 
-  @override
-  dispose() {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeRight,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
-    super.dispose();
-  }
-
   void reset() => setState(() => restart = true);
+
+  int minimax(List<int> board, bool isMaximizingPlayer) {
+    final score = getScore(board);
+    if (score < 2) {
+      return score;
+    }
+
+    if (isMaximizingPlayer) {
+      var bestVal = -100000;
+      for (var i = 0; i < 9; i++) {
+        if (board[i] == 0) {
+          board[i]++;
+          bestVal = max(bestVal, minimax(board, false));
+          board[i] = 0;
+        }
+      }
+      return bestVal;
+    } else {
+      var bestVal = 100000;
+      for (var i = 0; i < 9; i++) {
+        if (board[i] == 0) {
+          board[i]--;
+          bestVal = min(bestVal, minimax(board, true));
+          board[i] = 0;
+        }
+      }
+      return bestVal;
+    }
+  }
 
   void spawnMark(String text, {bool tie = false}) {
     activated = false;
-    // setState(() => winner = text);
-
     Future.delayed(const Duration(milliseconds: 500), () {
       if (!tie) {
         widget.changeScore!(turn);
@@ -84,26 +95,58 @@ class _BoardState extends State<Board> {
     });
   }
 
+  int getScore(List<int> board) {
+    for (var i in wins) {
+      if (board[i[0]] + board[i[1]] + board[i[2]] == 3) {
+        return 1;
+      } else if (board[i[0]] + board[i[1]] + board[i[2]] == -3) {
+        return -1;
+      }
+    }
+    if (!board.contains(0)) {
+      return 0;
+    }
+    return 2;
+  }
+
   void updateBoard(int tag) {
     if (board[tag] == 0 && activated) {
       setState(() {
         board[tag] += turn;
         turn *= -1;
-      });
-      for (var i in wins) {
-        if (board[i[0]] + board[i[1]] + board[i[2]] == 3) {
-          winmark = wins.indexOf(i);
-          spawnMark("O Won");
-          return;
-        } else if (board[i[0]] + board[i[1]] + board[i[2]] == -3) {
-          winmark = wins.indexOf(i);
-          spawnMark("X Won");
+        for (var i in wins) {
+          if (board[i[0]] + board[i[1]] + board[i[2]] == 3) {
+            winmark = wins.indexOf(i);
+            spawnMark("O Won");
+            return;
+          } else if (board[i[0]] + board[i[1]] + board[i[2]] == -3) {
+            winmark = wins.indexOf(i);
+            spawnMark("X Won");
+            return;
+          }
+        }
+        if (!board.contains(0)) {
+          spawnMark("Tie", tie: true);
           return;
         }
-      }
-      if (!board.contains(0)) {
-        spawnMark("Tie", tie: true);
-      }
+        if (widget.difficulty != 'Manual' && turn == -1) {
+          var bestPlace = 0;
+          var bestScore = 100000;
+          for (var i = 0; i < 9; i++) {
+            if (board[i] == 0) {
+              board[i]--;
+              final result = minimax(List<int>.from(board), true);
+              board[i] = 0;
+              if (bestScore > result) {
+                bestScore = result;
+                bestPlace = i;
+              }
+            }
+          }
+          Future.delayed(
+              const Duration(milliseconds: 700), () => updateBoard(bestPlace));
+        }
+      });
     }
   }
 
