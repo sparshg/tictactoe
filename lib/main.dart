@@ -104,7 +104,7 @@ class _MainState extends State<Main> {
       onPrimary: darkerGreen,
       primary: green,
       shape: const StadiumBorder(),
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(12),
       side: const BorderSide(
         width: 4.0,
         color: black,
@@ -113,7 +113,7 @@ class _MainState extends State<Main> {
     final _selectedStyle = ElevatedButton.styleFrom(
       primary: black,
       shape: const StadiumBorder(),
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(12),
     );
 
     Widget difficultyRow = Row(
@@ -154,10 +154,11 @@ class _MainState extends State<Main> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          const Spacer(flex: 2),
+          // const SizedBox(height: 10),
+          const Spacer(),
           title,
           difficultyRow,
-          const Spacer(flex: 2),
+          const Spacer(),
           Board(
             changeScore: (i) => setState(() {
               i == 1 ? scoreX++ : scoreO++;
@@ -167,7 +168,7 @@ class _MainState extends State<Main> {
             }),
             difficulty: _on,
           ),
-          const Spacer(flex: 2),
+          const Spacer(),
           Row(children: [
             Expanded(child: Score(score: scoreO, type: 0, reset: resetScores)),
             Expanded(child: Score(score: scoreX, type: 1, reset: resetScores)),
@@ -201,7 +202,7 @@ class _MainState extends State<Main> {
               ),
             ),
           ]),
-          const Spacer(),
+          // const Spacer(),
         ],
       ),
     );

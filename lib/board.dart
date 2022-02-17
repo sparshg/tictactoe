@@ -144,6 +144,23 @@ class _BoardState extends State<Board> {
           var bestScore = 100000;
           for (var i = 0; i < 9; i++) {
             if (board[i] == 0) {
+              final rand = Random().nextInt(100);
+              if (widget.difficulty == 'Easy') {
+                if (rand < 30) {
+                  bestPlace = i;
+                  break;
+                }
+              } else if (widget.difficulty == 'Medium') {
+                if (rand < 20) {
+                  bestPlace = i;
+                  break;
+                }
+              } else if (widget.difficulty == 'Hard') {
+                if (rand < 10) {
+                  bestPlace = i;
+                  break;
+                }
+              }
               board[i]--;
               final result =
                   minimax(List<int>.from(board), -100000, 100000, true);
