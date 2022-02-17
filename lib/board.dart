@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'tile.dart';
 import 'dart:math';
 import 'package:rive/rive.dart';
+import 'package:flutter/services.dart';
 
 class Board extends StatefulWidget {
   const Board({Key? key, this.changeScore, required this.difficulty})
@@ -48,8 +49,23 @@ class _BoardState extends State<Board> {
   @override
   void initState() {
     super.initState();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     _controllerB = OneShotAnimation('Black', onStop: reset);
     _controllerW = OneShotAnimation('White', onStop: reset);
+  }
+
+  @override
+  dispose() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeRight,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+    super.dispose();
   }
 
   void reset() => setState(() => restart = true);
@@ -78,9 +94,11 @@ class _BoardState extends State<Board> {
         if (board[i[0]] + board[i[1]] + board[i[2]] == 3) {
           winmark = wins.indexOf(i);
           spawnMark("O Won");
+          return;
         } else if (board[i[0]] + board[i[1]] + board[i[2]] == -3) {
           winmark = wins.indexOf(i);
           spawnMark("X Won");
+          return;
         }
       }
       if (!board.contains(0)) {
@@ -92,8 +110,8 @@ class _BoardState extends State<Board> {
   @override
   Widget build(BuildContext context) {
     const _padding = 20.0;
-    final double width =
-        min(MediaQuery.of(context).size.width - 2 * _padding, 590);
+    final double width = min(MediaQuery.of(context).size.width - 2 * _padding,
+        MediaQuery.of(context).size.height * 9 / 16);
     tiles = List.generate(
       9,
       (i) => Tile(

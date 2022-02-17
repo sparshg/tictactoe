@@ -178,8 +178,9 @@ class _MainState extends State<Main> {
               child: Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
-                child: ElevatedButton(
-                  child: const Text("Animations...", style: _buttonTextStyle2),
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.mode_edit_outline_outlined),
+                  label: const Text("Animations", style: _buttonTextStyle2),
                   onPressed: () {},
                   style: _buttonStyle2,
                 ),
