@@ -54,7 +54,7 @@ class _BoardState extends State<Board> {
 
   void reset() => setState(() => restart = true);
 
-  int minimax(List<int> board, bool isMaximizingPlayer) {
+  int minimax(List<int> board, int a, int b, bool isMaximizingPlayer) {
     final score = getScore(board);
     if (score < 2) {
       return score;
@@ -65,8 +65,13 @@ class _BoardState extends State<Board> {
       for (var i = 0; i < 9; i++) {
         if (board[i] == 0) {
           board[i]++;
-          bestVal = max(bestVal, minimax(board, false));
+          final eval = minimax(board, a, b, false);
+          bestVal = max(bestVal, eval);
+          a = max(a, eval);
           board[i] = 0;
+          if (b <= a) {
+            break;
+          }
         }
       }
       return bestVal;
@@ -75,8 +80,13 @@ class _BoardState extends State<Board> {
       for (var i = 0; i < 9; i++) {
         if (board[i] == 0) {
           board[i]--;
-          bestVal = min(bestVal, minimax(board, true));
+          final eval = minimax(board, a, b, true);
+          bestVal = min(bestVal, eval);
+          b = min(b, eval);
           board[i] = 0;
+          if (b <= a) {
+            break;
+          }
         }
       }
       return bestVal;
@@ -135,7 +145,8 @@ class _BoardState extends State<Board> {
           for (var i = 0; i < 9; i++) {
             if (board[i] == 0) {
               board[i]--;
-              final result = minimax(List<int>.from(board), true);
+              final result =
+                  minimax(List<int>.from(board), -100000, 100000, true);
               board[i] = 0;
               if (bestScore > result) {
                 bestScore = result;
