@@ -40,13 +40,16 @@ class _MainState extends State<Main> {
   var scoreO = 0;
   var _selected = 0;
   var _on = 'Easy';
+  var _timeout = false;
   final _difficulties = ['Easy', 'Medium', 'Hard', 'Impossible'];
 
   void resetScores() {
-    setState(() {
-      scoreX = 0;
-      scoreO = 0;
-    });
+    if (!_timeout) {
+      setState(() {
+        scoreX = 0;
+        scoreO = 0;
+      });
+    }
   }
 
   @override
@@ -150,7 +153,12 @@ class _MainState extends State<Main> {
           difficultyRow,
           const Spacer(flex: 2),
           Board(
-            changeScore: (i) => setState(() => i == 1 ? scoreX++ : scoreO++),
+            changeScore: (i) => setState(() {
+              i == 1 ? scoreX++ : scoreO++;
+              _timeout = true;
+              Future.delayed(
+                  const Duration(milliseconds: 1200), () => _timeout = false);
+            }),
             difficulty: _on,
           ),
           const Spacer(flex: 2),
