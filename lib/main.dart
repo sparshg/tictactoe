@@ -38,6 +38,9 @@ class Main extends StatefulWidget {
 class _MainState extends State<Main> {
   var scoreX = 0;
   var scoreO = 0;
+  var _selected = 0;
+  var _on = 'Easy';
+  final _difficulties = ['Easy', 'Medium', 'Hard', 'Impossible'];
 
   void resetScores() {
     setState(() {
@@ -61,23 +64,17 @@ class _MainState extends State<Main> {
       ),
     );
 
-    const _buttonText1 = Text(
-      "Open Issue",
-      style: TextStyle(
-        fontFamily: 'Monospace',
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-        color: black,
-      ),
+    const _buttonTextStyle1 = TextStyle(
+      fontFamily: 'Monospace',
+      fontSize: 18,
+      fontWeight: FontWeight.bold,
+      color: black,
     );
-    const _buttonText2 = Text(
-      "Animations...",
-      style: TextStyle(
-        fontFamily: 'Monospace',
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-        color: white,
-      ),
+    const _buttonTextStyle2 = TextStyle(
+      fontFamily: 'Monospace',
+      fontSize: 18,
+      fontWeight: FontWeight.bold,
+      color: white,
     );
     final _buttonStyle1 = ElevatedButton.styleFrom(
       onPrimary: darkerGreen,
@@ -94,15 +91,69 @@ class _MainState extends State<Main> {
       shape: const StadiumBorder(),
       padding: const EdgeInsets.all(16),
     );
+    final _deselectedStyle = ElevatedButton.styleFrom(
+      onPrimary: darkerGreen,
+      primary: green,
+      shape: const StadiumBorder(),
+      padding: const EdgeInsets.all(8),
+      side: const BorderSide(
+        width: 4.0,
+        color: black,
+      ),
+    );
+    final _selectedStyle = ElevatedButton.styleFrom(
+      primary: black,
+      shape: const StadiumBorder(),
+      padding: const EdgeInsets.all(8),
+    );
+
+    Widget difficultyRow = Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: ['Manual', _difficulties[_selected]]
+          .map(
+            (String s) => Expanded(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
+                child: ElevatedButton(
+                  child: Text(
+                    s,
+                    style: s == _on ? _buttonTextStyle2 : _buttonTextStyle1,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      if (s != 'Manual') {
+                        if (_on != 'Manual') {
+                          _selected = (_selected + 1) % 4;
+                        }
+                        _on = _difficulties[_selected];
+                      } else {
+                        _on = s;
+                      }
+                    });
+                  },
+                  style: s == _on ? _selectedStyle : _deselectedStyle,
+                ),
+              ),
+            ),
+          )
+          .toList(),
+    );
 
     return Scaffold(
       backgroundColor: green,
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
+          const Spacer(),
           title,
+          difficultyRow,
+          const Spacer(),
           Board(
-              changeScore: (i) => setState(() => i == 1 ? scoreX++ : scoreO++)),
+            changeScore: (i) => setState(() => i == 1 ? scoreX++ : scoreO++),
+            difficulty: _on,
+          ),
+          const Spacer(),
           Row(children: [
             Expanded(child: Score(score: scoreO, type: 0, reset: resetScores)),
             Expanded(child: Score(score: scoreX, type: 1, reset: resetScores)),
@@ -117,7 +168,7 @@ class _MainState extends State<Main> {
                     AssetImage('images/github.png'),
                     color: black,
                   ),
-                  label: _buttonText1,
+                  label: const Text("Open Issue", style: _buttonTextStyle1),
                   onPressed: _launchURL,
                   style: _buttonStyle1,
                 ),
@@ -128,7 +179,7 @@ class _MainState extends State<Main> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
                 child: ElevatedButton(
-                  child: _buttonText2,
+                  child: const Text("Animations...", style: _buttonTextStyle2),
                   onPressed: () {},
                   style: _buttonStyle2,
                 ),

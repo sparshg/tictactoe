@@ -4,8 +4,10 @@ import 'dart:math';
 import 'package:rive/rive.dart';
 
 class Board extends StatefulWidget {
-  const Board({Key? key, this.changeScore}) : super(key: key);
+  const Board({Key? key, this.changeScore, required this.difficulty})
+      : super(key: key);
   final ValueChanged<int>? changeScore;
+  final String difficulty;
 
   @override
   State<Board> createState() => _BoardState();
