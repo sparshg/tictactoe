@@ -39,6 +39,7 @@ class _BoardState extends State<Board> {
   var turn = 1;
   var winner = '';
   var activated = true;
+  var disabled = false;
   var restart = false;
   var mark = false;
   late List<Tile> tiles;
@@ -171,8 +172,11 @@ class _BoardState extends State<Board> {
               }
             }
           }
-          Future.delayed(
-              const Duration(milliseconds: 700), () => updateBoard(bestPlace));
+          disabled = true;
+          Future.delayed(const Duration(milliseconds: 600), () {
+            updateBoard(bestPlace);
+            disabled = false;
+          });
         }
       });
     }
@@ -189,7 +193,11 @@ class _BoardState extends State<Board> {
         tag: i,
         w: width / 3,
         state: board[i],
-        update: updateBoard,
+        update: (tag) {
+          if (!disabled) {
+            updateBoard(tag);
+          }
+        },
         reset: restart,
       ),
     );
