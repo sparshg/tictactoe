@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 import 'tile.dart';
 import 'dart:math';
+import 'dart:developer' as dev;
 import 'package:rive/rive.dart';
 
 class Board extends StatefulWidget {
-  const Board({Key? key, this.changeScore, required this.difficulty})
+  const Board(
+      {Key? key,
+      this.changeScore,
+      this.changeTurn,
+      required this.ai,
+      required this.difficulty})
       : super(key: key);
   final ValueChanged<int>? changeScore;
+  final ValueChanged<int>? changeTurn;
+  final int ai;
   final String difficulty;
 
   @override
@@ -62,7 +70,7 @@ class _BoardState extends State<Board> {
     }
 
     if (isMaximizingPlayer) {
-      var bestVal = -100000;
+      var bestVal = -1;
       for (var i = 0; i < 9; i++) {
         if (board[i] == 0) {
           board[i]++;
@@ -77,7 +85,7 @@ class _BoardState extends State<Board> {
       }
       return bestVal;
     } else {
-      var bestVal = 100000;
+      var bestVal = 1;
       for (var i = 0; i < 9; i++) {
         if (board[i] == 0) {
           board[i]--;
@@ -120,11 +128,58 @@ class _BoardState extends State<Board> {
     return 2;
   }
 
+  void aiMove() {
+    if (widget.difficulty != 'Manual' && turn == widget.ai && activated) {
+      var bestPlace = Random().nextInt(9);
+      var bestScore = -widget.ai;
+      for (var i = 0; i < 9; i++) {
+        if (!board.any((x) => x != 0)) {
+          break;
+        }
+        if (board[i] == 0) {
+          final rand = Random().nextInt(100);
+          if (widget.difficulty == 'Easy') {
+            if (rand < 30) {
+              bestPlace = i;
+              break;
+            }
+          } else if (widget.difficulty == 'Medium') {
+            if (rand < 20) {
+              bestPlace = i;
+              break;
+            }
+          } else if (widget.difficulty == 'Hard') {
+            if (rand < 10) {
+              bestPlace = i;
+              break;
+            }
+          }
+          board[i] += widget.ai;
+          final result = minimax(
+              List<int>.from(board), -1, 1, widget.ai == 1 ? false : true);
+          board[i] = 0;
+          if (bestScore * widget.ai < result * widget.ai) {
+            bestScore = result;
+            bestPlace = i;
+          }
+        }
+      }
+      dev.log('AI MOVE $turn at $bestPlace');
+      disabled = true;
+      Future.delayed(const Duration(milliseconds: 600), () {
+        updateBoard(bestPlace);
+        disabled = false;
+      });
+    }
+  }
+
   void updateBoard(int tag) {
     if (board[tag] == 0 && activated) {
       setState(() {
         board[tag] += turn;
         turn *= -1;
+        dev.log('ON TURN $turn');
+        widget.changeTurn!(turn);
         for (var i in wins) {
           if (board[i[0]] + board[i[1]] + board[i[2]] == 3) {
             winmark = wins.indexOf(i);
@@ -139,44 +194,6 @@ class _BoardState extends State<Board> {
         if (!board.contains(0)) {
           spawnMark("Tie", tie: true);
           return;
-        }
-        if (widget.difficulty != 'Manual' && turn == -1) {
-          var bestPlace = 0;
-          var bestScore = 100000;
-          for (var i = 0; i < 9; i++) {
-            if (board[i] == 0) {
-              final rand = Random().nextInt(100);
-              if (widget.difficulty == 'Easy') {
-                if (rand < 30) {
-                  bestPlace = i;
-                  break;
-                }
-              } else if (widget.difficulty == 'Medium') {
-                if (rand < 20) {
-                  bestPlace = i;
-                  break;
-                }
-              } else if (widget.difficulty == 'Hard') {
-                if (rand < 10) {
-                  bestPlace = i;
-                  break;
-                }
-              }
-              board[i]--;
-              final result =
-                  minimax(List<int>.from(board), -100000, 100000, true);
-              board[i] = 0;
-              if (bestScore > result) {
-                bestScore = result;
-                bestPlace = i;
-              }
-            }
-          }
-          disabled = true;
-          Future.delayed(const Duration(milliseconds: 600), () {
-            updateBoard(bestPlace);
-            disabled = false;
-          });
         }
       });
     }
@@ -205,10 +222,11 @@ class _BoardState extends State<Board> {
     if (restart) {
       restart = false;
       board = List.filled(9, 0);
-      turn = 1;
+      // turn *= -1;
       _redraw?.fire();
       activated = true;
     }
+    aiMove();
 
     final frame = LimitedBox(
       maxHeight: width,
@@ -246,7 +264,7 @@ class _BoardState extends State<Board> {
           child: RiveAnimation.asset(
             'images/art.riv',
             artboard: 'Mark',
-            controllers: [turn == 1 ? _controllerB : _controllerW],
+            controllers: [turn == -1 ? _controllerW : _controllerB],
           ),
         ),
       ),

@@ -1,3 +1,6 @@
+import 'dart:developer';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'board.dart';
@@ -21,7 +24,9 @@ class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+    ));
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -44,8 +49,10 @@ class Main extends StatefulWidget {
 class _MainState extends State<Main> {
   var scoreX = 0;
   var scoreO = 0;
-  var _selected = 0;
-  var _on = 'Easy';
+  var _selected = 2;
+  var _on = 'Hard';
+  var _ai = -1;
+  var _turn = 1;
   var _timeout = false;
   final _difficulties = ['Easy', 'Medium', 'Hard', 'Impossible'];
 
@@ -56,6 +63,10 @@ class _MainState extends State<Main> {
         scoreO = 0;
       });
     }
+  }
+
+  void changeAI(int to) {
+    _ai = to;
   }
 
   @override
@@ -134,10 +145,13 @@ class _MainState extends State<Main> {
                       if (s != 'Manual') {
                         if (_on != 'Manual') {
                           _selected = (_selected + 1) % 4;
+                        } else {
+                          _ai = _turn;
                         }
                         _on = _difficulties[_selected];
                       } else {
                         _on = s;
+                        _ai = 0;
                       }
                     });
                   },
@@ -160,18 +174,32 @@ class _MainState extends State<Main> {
           difficultyRow,
           const Spacer(),
           Board(
-            changeScore: (i) => setState(() {
-              i == 1 ? scoreX++ : scoreO++;
+            changeScore: (turn) => setState(() {
+              turn == 1 ? scoreX++ : scoreO++;
               _timeout = true;
               Future.delayed(
                   const Duration(milliseconds: 1200), () => _timeout = false);
             }),
             difficulty: _on,
+            changeTurn: (turn) => _turn = turn,
+            ai: _ai,
           ),
           const Spacer(),
           Row(children: [
-            Expanded(child: Score(score: scoreO, type: 0, reset: resetScores)),
-            Expanded(child: Score(score: scoreX, type: 1, reset: resetScores)),
+            Expanded(
+                child: Score(
+                    score: scoreO,
+                    type: 1,
+                    reset: resetScores,
+                    changeAI: changeAI,
+                    ai: _ai == 1 ? true : false)),
+            Expanded(
+                child: Score(
+                    score: scoreX,
+                    type: -1,
+                    reset: resetScores,
+                    changeAI: changeAI,
+                    ai: _ai == -1 ? true : false)),
           ]),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             Expanded(
@@ -183,7 +211,8 @@ class _MainState extends State<Main> {
                     AssetImage('images/github.png'),
                     color: black,
                   ),
-                  label: const Text("Open Issue", style: _buttonTextStyle1),
+                  label: const FittedBox(
+                      child: Text("Open Issue", style: _buttonTextStyle1)),
                   onPressed: _launchURL,
                   style: _buttonStyle1,
                 ),
@@ -195,17 +224,40 @@ class _MainState extends State<Main> {
                     const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.mode_edit_outline_outlined),
-                  label: const Text("Animations", style: _buttonTextStyle2),
-                  onPressed: () {},
+                  label: const FittedBox(
+                      child: Text("Animations", style: _buttonTextStyle2)),
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) => makeDialog());
+                  },
                   style: _buttonStyle2,
                 ),
               ),
             ),
           ]),
-          // const Spacer(),
         ],
       ),
     );
+  }
+
+  Widget makeDialog() {
+    TextStyle _textStyle =
+        const TextStyle(fontSize: 18, fontFamily: 'Monospace', color: black);
+    TextStyle _textStyle2 =
+        const TextStyle(fontSize: 18, fontFamily: 'Monospace', color: white);
+    ButtonStyle _supportButton = ElevatedButton.styleFrom(
+      primary: black,
+      shape: const StadiumBorder(),
+      padding: const EdgeInsets.all(12),
+      elevation: 8,
+    );
+    return StatefulBuilder(builder: (context, setState) {
+      return BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: SimpleDialog(),
+      );
+    });
   }
 
   _launchURL() async {
@@ -219,11 +271,19 @@ class _MainState extends State<Main> {
 }
 
 class Score extends StatefulWidget {
-  const Score({Key? key, required this.score, required this.type, this.reset})
+  const Score(
+      {Key? key,
+      required this.score,
+      required this.type,
+      this.reset,
+      this.changeAI,
+      this.ai = false})
       : super(key: key);
   final int score;
   final int type;
+  final bool ai;
   final VoidCallback? reset;
+  final ValueChanged<int>? changeAI;
 
   @override
   State<Score> createState() => _ScoreState();
@@ -244,17 +304,38 @@ class _ScoreState extends State<Score> {
       tapEffect();
       _score = widget.score;
     }
-    return Expanded(
-      child: Text(
-        '${widget.score}',
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          fontSize: 42,
-          fontWeight: FontWeight.bold,
-          color: black,
-        ),
+    final _text = Text(
+      '${widget.score}',
+      textAlign: TextAlign.center,
+      style: const TextStyle(
+        fontSize: 42,
+        fontWeight: FontWeight.bold,
+        color: black,
       ),
     );
+    if (widget.ai) {
+      return Expanded(
+        child: Stack(
+          alignment: Alignment.center,
+          clipBehavior: Clip.none,
+          children: [
+            _text,
+            const Positioned(
+                left: 10,
+                bottom: -10,
+                child: Text(
+                  "AI",
+                  style: TextStyle(
+                      fontFamily: 'Monospace',
+                      color: black,
+                      fontWeight: FontWeight.w600),
+                )),
+          ],
+        ),
+      );
+    } else {
+      return Expanded(child: _text);
+    }
   }
 
   Widget icon() => LimitedBox(
@@ -262,7 +343,7 @@ class _ScoreState extends State<Score> {
         maxWidth: 72,
         child: RiveAnimation.asset(
           'images/art.riv',
-          artboard: widget.type == 1 ? 'Cross' : 'Circle',
+          artboard: widget.type == 1 ? 'Circle' : 'Cross',
           onInit: (Artboard artboard) {
             final controller =
                 StateMachineController.fromArtboard(artboard, 'StateMachine');
@@ -276,6 +357,7 @@ class _ScoreState extends State<Score> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        widget.changeAI!(widget.type);
         tapEffect();
         widget.reset!();
       },
