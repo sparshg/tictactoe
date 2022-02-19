@@ -1,10 +1,15 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'board.dart';
 import 'support.dart';
 import 'package:rive/rive.dart';
 import 'package:flutter/services.dart';
 import 'constants.dart';
+import 'package:provider/provider.dart';
+import 'providermodel.dart';
 
 void main() {
   runApp(
@@ -23,10 +28,11 @@ class MyApp extends StatelessWidget {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    return MaterialApp(
-      title: 'TicTacToe',
-      theme: ThemeData(primarySwatch: Colors.teal),
-      home: const Main(),
+    return ChangeNotifierProvider(
+      create: (context) => ProviderModel(),
+      child: MaterialApp(
+        home: Main(),
+      ),
     );
   }
 }
@@ -39,12 +45,37 @@ class Main extends StatefulWidget {
 }
 
 class _MainState extends State<Main> {
+  late ProviderModel _appProvider;
+
+  @override
+  void initState() {
+    final provider = Provider.of<ProviderModel>(context, listen: false);
+    _appProvider = provider;
+
+    SchedulerBinding.instance!.addPostFrameCallback((_) async {
+      initInApp(provider);
+    });
+
+    super.initState();
+  }
+
+  initInApp(provider) async {
+    await provider.initInApp();
+  }
+
+  @override
+  void dispose() {
+    _appProvider.subscription.cancel();
+    super.dispose();
+  }
+
   var scoreX = 0;
   var scoreO = 0;
   var _selected = 2;
   var _on = 'Hard';
   var _ai = -1;
   var _turn = 1;
+  var _animMode = false;
   var _timeout = false;
   final _difficulties = ['Easy', 'Medium', 'Hard', 'Impossible'];
 
@@ -221,7 +252,11 @@ class _MainState extends State<Main> {
                   onPressed: () {
                     showDialog(
                         context: context,
-                        builder: (BuildContext context) => Support());
+                        builder: (BuildContext context) => Support(
+                            animMode: (bool t) => setState(() {
+                                  _animMode = t;
+                                  log("message");
+                                })));
                   },
                   style: _buttonStyle2,
                 ),

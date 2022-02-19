@@ -164,7 +164,6 @@ class _BoardState extends State<Board> {
           }
         }
       }
-      dev.log('AI MOVE $turn at $bestPlace');
       disabled = true;
       Future.delayed(const Duration(milliseconds: 600), () {
         updateBoard(bestPlace);
@@ -178,7 +177,6 @@ class _BoardState extends State<Board> {
       setState(() {
         board[tag] += turn;
         turn *= -1;
-        dev.log('ON TURN $turn');
         widget.changeTurn!(turn);
         for (var i in wins) {
           if (board[i[0]] + board[i[1]] + board[i[2]] == 3) {
