@@ -1,18 +1,10 @@
-import 'dart:developer';
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'board.dart';
+import 'support.dart';
 import 'package:rive/rive.dart';
 import 'package:flutter/services.dart';
-
-const Color green = Color(0xFF57BAAC);
-const Color lighterGreen = Color.fromARGB(255, 78, 170, 156);
-const Color darkGreen = Color(0xFF4A9F92);
-const Color darkerGreen = Color.fromARGB(255, 60, 128, 117);
-const Color black = Color(0xFF545454);
-const Color white = Color(0xFFF2EBD5);
+import 'constants.dart';
 
 void main() {
   runApp(
@@ -229,7 +221,7 @@ class _MainState extends State<Main> {
                   onPressed: () {
                     showDialog(
                         context: context,
-                        builder: (BuildContext context) => makeDialog());
+                        builder: (BuildContext context) => Support());
                   },
                   style: _buttonStyle2,
                 ),
@@ -239,25 +231,6 @@ class _MainState extends State<Main> {
         ],
       ),
     );
-  }
-
-  Widget makeDialog() {
-    TextStyle _textStyle =
-        const TextStyle(fontSize: 18, fontFamily: 'Monospace', color: black);
-    TextStyle _textStyle2 =
-        const TextStyle(fontSize: 18, fontFamily: 'Monospace', color: white);
-    ButtonStyle _supportButton = ElevatedButton.styleFrom(
-      primary: black,
-      shape: const StadiumBorder(),
-      padding: const EdgeInsets.all(12),
-      elevation: 8,
-    );
-    return StatefulBuilder(builder: (context, setState) {
-      return BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: SimpleDialog(),
-      );
-    });
   }
 
   _launchURL() async {
