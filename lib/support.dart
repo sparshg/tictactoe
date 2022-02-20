@@ -17,7 +17,14 @@ class Support extends StatefulWidget {
 
 class _SupportState extends State<Support> {
   bool _newAnimations = false;
-  final prices = {'smalld': 2, 'centerd': 5, 'larged': 10};
+  final prices = {
+    'smalld': 2,
+    'centerd': 5,
+    'larged': 10,
+    'small': 2,
+    'medium': 5,
+    'large': 10
+  };
 
   late ProviderModel _appProvider;
   TextStyle _textStyle =
@@ -63,43 +70,43 @@ class _SupportState extends State<Support> {
         contentPadding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
         children: [
-          Text(
-            "Also get some nice fluid animations :)",
-            style: _textStyle,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 12),
+          // Text(
+          //   "Also get some nice fluid animations :)",
+          //   style: _textStyle,
+          //   textAlign: TextAlign.center,
+          // ),
+          // const SizedBox(height: 12),
           Text(
             "Thanks for your support!",
             style: _textStyle,
             textAlign: TextAlign.center,
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Expanded(child: Text("New animations", style: _textStyle)),
-                  Switch(
-                    onChanged: (to) {
-                      if (provider.unlockAnims) {
-                        setState(() {
-                          widget.animMode(to);
-                          _newAnimations = to;
-                        });
-                      }
-                    },
-                    value: _newAnimations,
-                    inactiveThumbColor: provider.unlockAnims
-                        ? Colors.grey.shade800
-                        : Colors.grey,
-                    inactiveTrackColor: provider.unlockAnims
-                        ? Colors.grey.shade600.withOpacity(0.8)
-                        : Colors.grey.withOpacity(0.5),
-                    activeColor: black,
-                  ),
-                ]),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          //   child: Row(
+          //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          //       children: [
+          //         Expanded(child: Text("New animations", style: _textStyle)),
+          //         Switch(
+          //           onChanged: (to) {
+          //             if (provider.unlockAnims) {
+          //               setState(() {
+          //                 widget.animMode(to);
+          //                 _newAnimations = to;
+          //               });
+          //             }
+          //           },
+          //           value: _newAnimations,
+          //           inactiveThumbColor: provider.unlockAnims
+          //               ? Colors.grey.shade800
+          //               : Colors.grey,
+          //           inactiveTrackColor: provider.unlockAnims
+          //               ? Colors.grey.shade600.withOpacity(0.8)
+          //               : Colors.grey.withOpacity(0.5),
+          //           activeColor: black,
+          //         ),
+          //       ]),
+          // ),
           if (provider.queryProductError == null) _buildProductList(provider),
           if (provider.queryProductError == null)
             _buildConnectionCheckTile(provider),
@@ -170,7 +177,7 @@ class _SupportState extends State<Support> {
                 ['small', 'medium', 'large'].contains(productDetails.id))) {
           return Expanded(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 0.0),
+              padding: const EdgeInsets.fromLTRB(4.0, 16.0, 4.0, 0.0),
               child: ElevatedButton(
                 child: Text('\$ ${prices[productDetails.id]}'),
                 style: _supportButton,
