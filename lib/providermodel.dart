@@ -3,12 +3,21 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
+// import 'consumable_store.dart';
+
 List<PurchaseDetails> purchases = [];
 List<ProductDetails> products = [];
 const bool kAutoConsume = true;
 // const String kConsumableId = 'small';
 // const String kUpgradeId = 'medium';
-const List<String> _kProductIds = ['small', 'medium', 'large'];
+const List<String> _kProductIds = [
+  'small',
+  'medium',
+  'large',
+  'smalld',
+  'centerd',
+  'larged'
+];
 
 class ProviderModel with ChangeNotifier {
   final InAppPurchase inAppPurchase = InAppPurchase.instance;
@@ -45,8 +54,13 @@ class ProviderModel with ChangeNotifier {
   }
 
   verifyPreviousPurchases() async {
+    print("=============================verifyPreviousPurchases");
     await inAppPurchase.restorePurchases();
     await Future.delayed(const Duration(milliseconds: 100), () {
+      for (var pur in purchases) {
+        log(pur.productID);
+      }
+      //   if (pur.productID.contains('non_consumable')) {
       if (purchases.isNotEmpty) {
         unlockAnims = true;
       }
@@ -185,6 +199,10 @@ class ProviderModel with ChangeNotifier {
         // }
         if (purchaseDetails.pendingCompletePurchase) {
           await inAppPurchase.completePurchase(purchaseDetails);
+          if (purchaseDetails.productID == 'consumable_product') {
+            print('================================You got coins');
+          }
+
           verifyPreviousPurchases();
         }
       }

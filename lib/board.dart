@@ -131,7 +131,7 @@ class _BoardState extends State<Board> {
   void aiMove() {
     if (widget.difficulty != 'Manual' && turn == widget.ai && activated) {
       var bestPlace = Random().nextInt(9);
-      var bestScore = -widget.ai;
+      var bestScore = -2 * widget.ai;
       for (var i = 0; i < 9; i++) {
         if (!board.any((x) => x != 0)) {
           break;
@@ -139,7 +139,7 @@ class _BoardState extends State<Board> {
         if (board[i] == 0) {
           final rand = Random().nextInt(100);
           if (widget.difficulty == 'Easy') {
-            if (rand < 30) {
+            if (rand < 25) {
               bestPlace = i;
               break;
             }
@@ -156,7 +156,7 @@ class _BoardState extends State<Board> {
           }
           board[i] += widget.ai;
           final result = minimax(
-              List<int>.from(board), -1, 1, widget.ai == 1 ? false : true);
+              List<int>.from(board), -2, 2, widget.ai == 1 ? false : true);
           board[i] = 0;
           if (bestScore * widget.ai < result * widget.ai) {
             bestScore = result;

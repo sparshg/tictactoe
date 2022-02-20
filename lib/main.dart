@@ -31,6 +31,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => ProviderModel(),
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         home: Main(),
       ),
     );
@@ -255,7 +256,6 @@ class _MainState extends State<Main> {
                         builder: (BuildContext context) => Support(
                             animMode: (bool t) => setState(() {
                                   _animMode = t;
-                                  log("message");
                                 })));
                   },
                   style: _buttonStyle2,
