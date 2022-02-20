@@ -8,14 +8,14 @@ class Tile extends StatefulWidget {
     required this.w,
     required this.state,
     required this.update,
-    required this.reset,
+    required this.restart,
   }) : super(key: key);
 
   final double w;
   final int tag;
   final int state;
   final ValueChanged<int> update;
-  final bool reset;
+  final bool restart;
 
   @override
   State<Tile> createState() => _TileState();
@@ -61,7 +61,7 @@ class _TileState extends State<Tile> {
       default:
         return Container();
     }
-    if (widget.reset) {
+    if (widget.restart) {
       _draw?.change(false);
       Future.delayed(const Duration(milliseconds: 200), () {
         setState(() {});

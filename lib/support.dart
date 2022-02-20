@@ -70,43 +70,43 @@ class _SupportState extends State<Support> {
         contentPadding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
         children: [
-          // Text(
-          //   "Also get some nice fluid animations :)",
-          //   style: _textStyle,
-          //   textAlign: TextAlign.center,
-          // ),
-          // const SizedBox(height: 12),
+          Text(
+            "Also get some nice fluid animations :)",
+            style: _textStyle,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
           Text(
             "Thanks for your support!",
             style: _textStyle,
             textAlign: TextAlign.center,
           ),
-          // Padding(
-          //   padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          //   child: Row(
-          //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          //       children: [
-          //         Expanded(child: Text("New animations", style: _textStyle)),
-          //         Switch(
-          //           onChanged: (to) {
-          //             if (provider.unlockAnims) {
-          //               setState(() {
-          //                 widget.animMode(to);
-          //                 _newAnimations = to;
-          //               });
-          //             }
-          //           },
-          //           value: _newAnimations,
-          //           inactiveThumbColor: provider.unlockAnims
-          //               ? Colors.grey.shade800
-          //               : Colors.grey,
-          //           inactiveTrackColor: provider.unlockAnims
-          //               ? Colors.grey.shade600.withOpacity(0.8)
-          //               : Colors.grey.withOpacity(0.5),
-          //           activeColor: black,
-          //         ),
-          //       ]),
-          // ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(child: Text("New animations", style: _textStyle)),
+                  Switch(
+                    onChanged: (to) {
+                      if (provider.unlockAnims) {
+                        setState(() {
+                          widget.animMode(to);
+                          _newAnimations = to;
+                        });
+                      }
+                    },
+                    value: _newAnimations,
+                    inactiveThumbColor: provider.unlockAnims
+                        ? Colors.grey.shade800
+                        : Colors.grey,
+                    inactiveTrackColor: provider.unlockAnims
+                        ? Colors.grey.shade600.withOpacity(0.8)
+                        : Colors.grey.withOpacity(0.5),
+                    activeColor: black,
+                  ),
+                ]),
+          ),
           if (provider.queryProductError == null) _buildProductList(provider),
           if (provider.queryProductError == null)
             _buildConnectionCheckTile(provider),

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -76,6 +74,7 @@ class _MainState extends State<Main> {
   var _on = 'Hard';
   var _ai = -1;
   var _turn = 1;
+  var _prevAi = 0;
   var _animMode = false;
   var _timeout = false;
   final _difficulties = ['Easy', 'Medium', 'Hard', 'Impossible'];
@@ -90,7 +89,9 @@ class _MainState extends State<Main> {
   }
 
   void changeAI(int to) {
-    _ai = to;
+    if (_on != 'Manual') {
+      _ai = to;
+    }
   }
 
   @override
@@ -170,11 +171,12 @@ class _MainState extends State<Main> {
                         if (_on != 'Manual') {
                           _selected = (_selected + 1) % 4;
                         } else {
-                          _ai = _turn;
+                          _ai = _prevAi;
                         }
                         _on = _difficulties[_selected];
                       } else {
                         _on = s;
+                        _prevAi = _ai;
                         _ai = 0;
                       }
                     });

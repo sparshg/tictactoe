@@ -46,8 +46,14 @@ class _BoardState extends State<Board> {
   var board = List.filled(9, 0);
   var turn = 1;
   var winner = '';
+
+  // deactivate as soon as game end detected
   var activated = true;
+
+  // disable when ai turn
   var disabled = false;
+
+  // restart is true when mark spawn completed, only for one frame
   var restart = false;
   var mark = false;
   late List<Tile> tiles;
@@ -57,8 +63,8 @@ class _BoardState extends State<Board> {
   @override
   void initState() {
     super.initState();
-    _controllerB = OneShotAnimation('Black', onStop: reset);
-    _controllerW = OneShotAnimation('White', onStop: reset);
+    _controllerB = OneShotAnimation('Black');
+    _controllerW = OneShotAnimation('White');
   }
 
   void reset() => setState(() => restart = true);
@@ -213,7 +219,7 @@ class _BoardState extends State<Board> {
             updateBoard(tag);
           }
         },
-        reset: restart,
+        restart: restart,
       ),
     );
 
@@ -252,6 +258,7 @@ class _BoardState extends State<Board> {
 
   Widget markOnWin(width) {
     mark = false;
+    Future.delayed(const Duration(milliseconds: 500), reset);
     return Transform.translate(
       offset: Offset(
           width / 3 * winpos[winmark][0], width / 3 * winpos[winmark][1]),
@@ -262,6 +269,7 @@ class _BoardState extends State<Board> {
           child: RiveAnimation.asset(
             'images/art.riv',
             artboard: 'Mark',
+            // Controller calls reset() on animation finish
             controllers: [turn == -1 ? _controllerW : _controllerB],
           ),
         ),
