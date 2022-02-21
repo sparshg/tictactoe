@@ -8,14 +8,14 @@ class Board extends StatefulWidget {
   const Board(
       {Key? key,
       this.changeScore,
-      this.changeTurn,
       required this.ai,
+      required this.newAssets,
       required this.difficulty})
       : super(key: key);
   final ValueChanged<int>? changeScore;
-  final ValueChanged<int>? changeTurn;
   final int ai;
   final String difficulty;
+  final bool newAssets;
 
   @override
   State<Board> createState() => _BoardState();
@@ -58,6 +58,7 @@ class _BoardState extends State<Board> {
   var mark = false;
   late List<Tile> tiles;
   SMITrigger? _redraw;
+  SMIBool? _newAnim;
   late RiveAnimationController _controllerB, _controllerW;
 
   @override
@@ -183,7 +184,6 @@ class _BoardState extends State<Board> {
       setState(() {
         board[tag] += turn;
         turn *= -1;
-        widget.changeTurn!(turn);
         for (var i in wins) {
           if (board[i[0]] + board[i[1]] + board[i[2]] == 3) {
             winmark = wins.indexOf(i);
@@ -213,6 +213,7 @@ class _BoardState extends State<Board> {
       (i) => Tile(
         tag: i,
         w: width / 3,
+        newAssets: widget.newAssets,
         state: board[i],
         update: (tag) {
           if (!disabled) {
@@ -222,6 +223,8 @@ class _BoardState extends State<Board> {
         restart: restart,
       ),
     );
+
+    _newAnim?.value = widget.newAssets;
 
     if (restart) {
       restart = false;
@@ -242,6 +245,7 @@ class _BoardState extends State<Board> {
               StateMachineController.fromArtboard(artboard, 'StateMachine');
           artboard.addController(controller!);
           _redraw = controller.findInput<bool>('Reset') as SMITrigger;
+          _newAnim = controller.findInput<bool>('NewAnim') as SMIBool;
         },
       ),
     );
@@ -258,7 +262,7 @@ class _BoardState extends State<Board> {
 
   Widget markOnWin(width) {
     mark = false;
-    Future.delayed(const Duration(milliseconds: 500), reset);
+    Future.delayed(const Duration(milliseconds: 1000), reset);
     return Transform.translate(
       offset: Offset(
           width / 3 * winpos[winmark][0], width / 3 * winpos[winmark][1]),

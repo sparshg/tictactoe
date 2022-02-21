@@ -9,11 +9,13 @@ class Tile extends StatefulWidget {
     required this.state,
     required this.update,
     required this.restart,
+    required this.newAssets,
   }) : super(key: key);
 
   final double w;
   final int tag;
   final int state;
+  final bool newAssets;
   final ValueChanged<int> update;
   final bool restart;
 
@@ -68,7 +70,7 @@ class _TileState extends State<Tile> {
       });
     }
     return RiveAnimation.asset(
-      'images/art.riv',
+      widget.newAssets ? 'images/art2.riv' : 'images/art.riv',
       artboard: _image,
       onInit: _riveInit,
     );

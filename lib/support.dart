@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
@@ -7,6 +6,7 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'providermodel.dart';
 import 'package:provider/provider.dart';
+import 'preferences.dart';
 
 class Support extends StatefulWidget {
   const Support({Key? key, required this.animMode}) : super(key: key);
@@ -16,7 +16,7 @@ class Support extends StatefulWidget {
 }
 
 class _SupportState extends State<Support> {
-  bool _newAnimations = false;
+  bool _newAnimations = Preferences.getResource() ?? false;
   final prices = {
     'smalld': 2,
     'centerd': 5,
@@ -29,8 +29,6 @@ class _SupportState extends State<Support> {
   late ProviderModel _appProvider;
   TextStyle _textStyle =
       const TextStyle(fontSize: 18, fontFamily: 'Monospace', color: black);
-  TextStyle _textStyle2 =
-      const TextStyle(fontSize: 18, fontFamily: 'Monospace', color: white);
 
   @override
   void initState() {
@@ -143,7 +141,6 @@ class _SupportState extends State<Support> {
     }
     List<Widget> productList = <Widget>[];
     if (provider.notFoundIds.isNotEmpty) {
-      log(provider.notFoundIds.toString());
       productList.add(
         Text('Error fetching',
             style: TextStyle(color: ThemeData.light().errorColor)),
@@ -177,7 +174,7 @@ class _SupportState extends State<Support> {
                 ['small', 'medium', 'large'].contains(productDetails.id))) {
           return Expanded(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(4.0, 16.0, 4.0, 0.0),
+              padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 0.0),
               child: ElevatedButton(
                 child: Text('\$ ${prices[productDetails.id]}'),
                 style: _supportButton,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'preferences.dart';
 import 'board.dart';
 import 'support.dart';
 import 'package:rive/rive.dart';
@@ -9,7 +10,17 @@ import 'constants.dart';
 import 'package:provider/provider.dart';
 import 'providermodel.dart';
 
-void main() {
+Future main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    systemNavigationBarColor: green,
+  ));
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+  await Preferences.init();
   runApp(
     const MyApp(),
   );
@@ -19,13 +30,6 @@ class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-    ));
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
     return ChangeNotifierProvider(
       create: (context) => ProviderModel(),
       child: MaterialApp(
@@ -45,6 +49,15 @@ class Main extends StatefulWidget {
 
 class _MainState extends State<Main> {
   late ProviderModel _appProvider;
+  var scoreX = 0;
+  var scoreO = 0;
+  var _selected = 2;
+  var _on = 'Hard';
+  var _ai = -1;
+  var _prevAi = 0;
+  bool _newAssets = false;
+  var _timeout = false;
+  final _difficulties = ['Easy', 'Medium', 'Hard', 'Impossible'];
 
   @override
   void initState() {
@@ -60,6 +73,11 @@ class _MainState extends State<Main> {
 
   initInApp(provider) async {
     await provider.initInApp();
+    if (provider.unlockAnims) {
+      setState(() {
+        _newAssets = (Preferences.getResource() ?? false);
+      });
+    }
   }
 
   @override
@@ -67,17 +85,6 @@ class _MainState extends State<Main> {
     _appProvider.subscription.cancel();
     super.dispose();
   }
-
-  var scoreX = 0;
-  var scoreO = 0;
-  var _selected = 2;
-  var _on = 'Hard';
-  var _ai = -1;
-  var _turn = 1;
-  var _prevAi = 0;
-  var _animMode = false;
-  var _timeout = false;
-  final _difficulties = ['Easy', 'Medium', 'Hard', 'Impossible'];
 
   void resetScores() {
     if (!_timeout) {
@@ -207,7 +214,7 @@ class _MainState extends State<Main> {
                   const Duration(milliseconds: 1200), () => _timeout = false);
             }),
             difficulty: _on,
-            changeTurn: (turn) => _turn = turn,
+            newAssets: _newAssets,
             ai: _ai,
           ),
           const Spacer(),
@@ -255,10 +262,13 @@ class _MainState extends State<Main> {
                   onPressed: () {
                     showDialog(
                         context: context,
-                        builder: (BuildContext context) => Support(
-                            animMode: (bool t) => setState(() {
-                                  _animMode = t;
-                                })));
+                        builder: (BuildContext context) =>
+                            Support(animMode: (bool t) async {
+                              await Preferences.setResource(t);
+                              setState(() {
+                                _newAssets = t;
+                              });
+                            }));
                   },
                   style: _buttonStyle2,
                 ),
@@ -348,20 +358,22 @@ class _ScoreState extends State<Score> {
     }
   }
 
-  Widget icon() => LimitedBox(
-        maxHeight: 72,
-        maxWidth: 72,
-        child: RiveAnimation.asset(
-          'images/art.riv',
-          artboard: widget.type == 1 ? 'Circle' : 'Cross',
-          onInit: (Artboard artboard) {
-            final controller =
-                StateMachineController.fromArtboard(artboard, 'StateMachine');
-            artboard.addController(controller!);
-            _draw = controller.findInput<bool>('Draw') as SMIBool;
-          },
-        ),
-      );
+  Widget icon() {
+    return LimitedBox(
+      maxHeight: 72,
+      maxWidth: 72,
+      child: RiveAnimation.asset(
+        'images/art.riv',
+        artboard: widget.type == 1 ? 'Circle' : 'Cross',
+        onInit: (Artboard artboard) {
+          final controller =
+              StateMachineController.fromArtboard(artboard, 'StateMachine');
+          artboard.addController(controller!);
+          _draw = controller.findInput<bool>('Draw') as SMIBool;
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
