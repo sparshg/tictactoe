@@ -146,17 +146,17 @@ class _BoardState extends State<Board> {
         if (board[i] == 0) {
           final rand = Random().nextInt(100);
           if (widget.difficulty == 'Easy') {
-            if (rand < 25) {
-              bestPlace = i;
-              break;
-            }
-          } else if (widget.difficulty == 'Medium') {
             if (rand < 20) {
               bestPlace = i;
               break;
             }
+          } else if (widget.difficulty == 'Medium') {
+            if (rand < 14) {
+              bestPlace = i;
+              break;
+            }
           } else if (widget.difficulty == 'Hard') {
-            if (rand < 10) {
+            if (rand < 7) {
               bestPlace = i;
               break;
             }
